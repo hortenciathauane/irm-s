@@ -1,0 +1,6 @@
+{
+  "name": "Restaurante das Irmãs - Gestão de Estoque",
+  "description": "Sistema acolhedor para controle de estoque de pratos e bebidas do Restaurante das Irmãs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

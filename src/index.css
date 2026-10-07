@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Marcellus', Georgia, serif;
+  }
+}
+
+/* Custom smooth scroll and transitions */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d97706 #fef3c7;
+}
+
+@media print {
+  header, button, .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .bg-gradient-to-r {
+    background: #f5f5f4 !important;
+    color: #1c1917 !important;
+  }
+}
+
+
