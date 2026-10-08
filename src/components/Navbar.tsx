@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, LogOut, Printer, RefreshCw, Clock } from 'lucide-react';
+import { Plus, LogOut, Printer, RefreshCw, Clock, Utensils, Bell } from 'lucide-react';
 import { AuthUser } from '../services/authService';
 import { KitchenStatusResult } from '../types/schedule';
 import sistersImg from '../assets/images/duas_irmas_restaurante_1791393415864.jpg';
@@ -7,6 +7,9 @@ import sistersImg from '../assets/images/duas_irmas_restaurante_1791393415864.jp
 interface NavbarProps {
   user: AuthUser;
   kitchenStatus: KitchenStatusResult;
+  currentTab: 'estoque' | 'pedidos';
+  onTabChange: (tab: 'estoque' | 'pedidos') => void;
+  pendingOrdersCount: number;
   onOpenScheduleModal: () => void;
   onLogout: () => void;
   onOpenNewItemModal: () => void;
@@ -18,6 +21,9 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   user,
   kitchenStatus,
+  currentTab,
+  onTabChange,
+  pendingOrdersCount,
   onOpenScheduleModal,
   onLogout,
   onOpenNewItemModal,
@@ -26,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   isRefreshing,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-amber-900/10 shadow-xs">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-900/10 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Brand & Sisters Avatar */}
@@ -80,21 +86,55 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </div>
               <p className="text-xs text-stone-500 font-sans hidden xs:block">
-                Controle de pratos, bebidas e sobremesas do dia
+                Controle de estoque e recepção de pedidos
               </p>
             </div>
           </div>
 
+          {/* Navigation View Switcher (Estoque vs Pedidos) */}
+          <div className="hidden md:flex items-center bg-stone-100 p-1.5 rounded-2xl border border-stone-200/90 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => onTabChange('estoque')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                currentTab === 'estoque'
+                  ? 'bg-white text-amber-900 shadow-sm border border-stone-200/80'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <Utensils className="w-3.5 h-3.5" />
+              <span>Estoque & Cardápio</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onTabChange('pedidos')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 relative cursor-pointer ${
+                currentTab === 'pedidos'
+                  ? 'bg-white text-amber-900 shadow-sm border border-stone-200/80'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <Bell className="w-3.5 h-3.5" />
+              <span>Pedidos Recebidos</span>
+              {pendingOrdersCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-600 text-white animate-bounce">
+                  {pendingOrdersCount}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Schedule Adjustment Button (Mobile & Desktop) */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Schedule Adjustment Button */}
             <button
               onClick={onOpenScheduleModal}
               title="Ajustar horários de atendimento"
               className="p-2 sm:px-3 sm:py-2 text-stone-700 hover:text-amber-800 hover:bg-amber-50 rounded-xl border border-stone-200/80 transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
             >
               <Clock className="w-4 h-4 text-amber-700" />
-              <span className="hidden md:inline">Horários</span>
+              <span className="hidden lg:inline">Horários</span>
             </button>
 
             {/* Sync / Refresh */}
@@ -105,26 +145,28 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="p-2 sm:px-3 sm:py-2 text-stone-600 hover:text-amber-800 hover:bg-amber-50 rounded-xl border border-stone-200/80 transition-all text-xs font-medium flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-amber-700' : ''}`} />
-              <span className="hidden lg:inline">Atualizar</span>
+              <span className="hidden xl:inline">Atualizar</span>
             </button>
+
+            {/* Primary Action Button (Changes depending on Tab) */}
+            {currentTab === 'estoque' ? (
+              <button
+                onClick={onOpenNewItemModal}
+                className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 text-white rounded-xl shadow-sm text-xs sm:text-sm font-semibold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Incluir Item</span>
+              </button>
+            ) : null}
 
             {/* Print list */}
             <button
               onClick={onPrint}
-              title="Imprimir lista para o quadro da cozinha"
+              title="Imprimir quadro ou comanda"
               className="p-2 sm:px-3 sm:py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-xl border border-stone-200/80 transition-all text-xs font-medium flex items-center gap-1.5 cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              <span className="hidden lg:inline">Imprimir</span>
-            </button>
-
-            {/* Primary Add Button */}
-            <button
-              onClick={onOpenNewItemModal}
-              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 text-white rounded-xl shadow-sm shadow-orange-900/20 text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 active:scale-95 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Incluir Item</span>
+              <span className="hidden xl:inline">Imprimir</span>
             </button>
 
             {/* User Profile & Logout */}
@@ -148,6 +190,40 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
+        </div>
+
+        {/* Mobile View Switcher Tab Bar */}
+        <div className="flex md:hidden items-center justify-center gap-2 py-2.5 border-t border-stone-100">
+          <button
+            type="button"
+            onClick={() => onTabChange('estoque')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              currentTab === 'estoque'
+                ? 'bg-amber-700 text-white shadow-xs'
+                : 'bg-stone-100 text-stone-600'
+            }`}
+          >
+            <Utensils className="w-3.5 h-3.5" />
+            <span>Estoque & Cardápio</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange('pedidos')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative cursor-pointer ${
+              currentTab === 'pedidos'
+                ? 'bg-amber-700 text-white shadow-xs'
+                : 'bg-stone-100 text-stone-600'
+            }`}
+          >
+            <Bell className="w-3.5 h-3.5" />
+            <span>Pedidos</span>
+            {pendingOrdersCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-600 text-white">
+                {pendingOrdersCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
     </header>
